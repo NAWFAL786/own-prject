@@ -1,0 +1,6 @@
+{
+  "name": "AURELIS — Smart Observability",
+  "description": "Two-tier zero-raw-egress enterprise AIOps observability platform with live Tier 1 collector telemetry, multi-site residency, and Fix-or-Notify closed-loop remediation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

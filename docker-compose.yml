@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aurelis-postgres
+    environment:
+      POSTGRES_DB: aurelis
+      POSTGRES_USER: aurelis
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - aurelis_pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./db/rls_policies.sql:/docker-entrypoint-initdb.d/02_rls.sql:ro
+      - ./db/seed_simulated.sql:/docker-entrypoint-initdb.d/03_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aurelis -d aurelis"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: aurelis-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  saas-api:
+    image: node:22-alpine
+    container_name: aurelis-saas-api
+    working_dir: /app
+    command: sh -c "npm install && npm run build && npm run start"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-postgres}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://aurelis@postgres:5432/aurelis}
+      SMTP_HOST: mailhog
+      SMTP_PORT: "1025"
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+    ports:
+      - "8080:3000"
+      - "3000:3000"
+    volumes:
+      - .:/app
+
+  collector:
+    image: python:3.11-slim
+    container_name: aurelis-collector
+    working_dir: /app
+    command: python3 collector/daemon.py
+    depends_on:
+      - saas-api
+    environment:
+      AURELIS_INGEST_URL: http://saas-api:3000/v1/ingest
+      AURELIS_JOBS_URL: http://saas-api:3000/v1/collector/jobs
+      AURELIS_COMPLIANCE_PROFILE: gdpr
+    volumes:
+      - .:/app
+
+volumes:
+  aurelis_pgdata:

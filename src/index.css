@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --aurelis-bg: #FFFFFF;
+    --aurelis-canvas: #FAFAF7;
+    --aurelis-ink: #171717;
+    --aurelis-charcoal: #242424;
+    --aurelis-muted: #737373;
+    --aurelis-border: #E9E5DC;
+    --aurelis-gold: #C49A35;
+    --aurelis-gold-rich: #B68A27;
+    --aurelis-gold-soft: #F5EBD2;
+    --aurelis-gold-dark: #8D6B20;
+  }
+
+  body {
+    font-family: 'Public Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--aurelis-canvas);
+    color: var(--aurelis-ink);
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  .font-mono, code, pre {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
